@@ -10,7 +10,7 @@ var Dancer = function(top, left, timeBetweenSteps){
 
 Dancer.prototype.step = function(){
   var that = this;
-  setTimeout(that.step.bind(that), that.timeBetweenSteps);
+  setTimeout(that.step.bind(this), this.timeBetweenSteps);
 };
 
 Dancer.prototype.setPosition = function(top,left){
@@ -19,4 +19,11 @@ Dancer.prototype.setPosition = function(top,left){
     left: left
   };
   this.$node.css(styleSettings);
+};
+
+Dancer.prototype.lineUp = function(left){
+  var styleSettings = {
+    left: left
+  };
+  this.$node.animate(styleSettings, 'slow');
 };
