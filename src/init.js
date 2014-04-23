@@ -89,7 +89,6 @@ $(document).ready(function(){
     }
     addBlock();
     addBlock();
-    addBlock();
   });
 
   var checkForBlock = function(left,top){
@@ -179,7 +178,7 @@ $(document).ready(function(){
     $(this).text('Line up!').removeClass('dance').addClass('lineUp');
   });
 
-  for(var i = 0; i < 7 ; i++){
+  for(var i = 0; i < 6 ; i++){
     addBlock();
   }
 
