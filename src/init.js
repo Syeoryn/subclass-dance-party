@@ -41,6 +41,10 @@ $(document).ready(function(){
         openPositions.push(position);
       }
     }
+    if(!openPositions.length){
+      alert("Game Over!");
+      return undefined;
+    }
     var newPosition = openPositions[Math.floor(Math.random() * openPositions.length)];
     return newPosition;
   };
@@ -48,6 +52,10 @@ $(document).ready(function(){
   var types = [BlinkyDancer,ColorDancer,ScaredDancer];
 
   $(".addDancerButton").on("click", function(event){
+    addBlock();
+  });
+
+  var addBlock = function(){
     var dancerMakerFunction = types[Math.floor(Math.random() * types.length)];
 
     var newPosition = getOpenPosition();
@@ -61,13 +69,14 @@ $(document).ready(function(){
     dancer.$node.css({
       width: gridWidth * 0.9 + "px",
       height: gridHeight * 0.9 + "px",
-      "font-size": gridWidth * 0.45 + "px",
+      "font-size": gridWidth * 0.6 + "px",
       "text-align": "center"
     });
 
     window.dancers.push(dancer);
     $('#danceFloor').append(dancer.$node);
-  });
+
+  };
 
   $("body").on("click", ".dancer", function(event) {
     var targetLeft = $(this).position().left - gridWidth;
@@ -78,6 +87,9 @@ $(document).ready(function(){
     } else{
       move($(this));
     }
+    addBlock();
+    addBlock();
+    addBlock();
   });
 
   var checkForBlock = function(left,top){
@@ -92,9 +104,18 @@ $(document).ready(function(){
 
   var move = function(node, callback){
     callback = callback || null;
+    // if(!callback){
+    //   callback = function(){
+    //     var newLeft = leftChoices[leftChoices.indexOf(position.left) - 1];
+    //     var newTop = topChoices[topChoices.indexOf(position.top)];
+    //     var leftBlock = checkForBlock(newLeft,newTop);
+    //     if(!leftBlock){
+    //       move(node);
+    //     }
+    //   };
+    // }
     var position = node.position();
     if(position.left === 15){
-      console.log("can't do that!");
       return false;
     }
     removePosition(leftChoices.indexOf(position.left),topChoices.indexOf(position.top));
@@ -116,7 +137,6 @@ $(document).ready(function(){
     } else if (num1 >= 3 && num2 >= 3 && num1 === num2) {
       merge(fromNode, toNode);
     } else {
-      console.log("Can't move that!");
     }
   };
 
@@ -137,7 +157,6 @@ $(document).ready(function(){
     node.remove();
     for(var i = 0; i < window.dancers.length; i++){
       var id = window.dancers[i]._id;
-      console.log(num)
       if(id === num.data("dancerid") && num.position().left === 0 && num.position().top === 0){
         window.dancers.splice(i,1);
       }
@@ -159,5 +178,9 @@ $(document).ready(function(){
     }
     $(this).text('Line up!').removeClass('dance').addClass('lineUp');
   });
+
+  for(var i = 0; i < 7 ; i++){
+    addBlock();
+  }
 
 });
