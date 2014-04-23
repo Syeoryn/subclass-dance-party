@@ -45,9 +45,10 @@ $(document).ready(function(){
     return newPosition;
   };
 
+  var types = [BlinkyDancer,ColorDancer,ScaredDancer];
+
   $(".addDancerButton").on("click", function(event){
-    var dancerMakerFunctionName = $(this).data("dancer-maker-function-name");
-    var dancerMakerFunction = window[dancerMakerFunctionName];
+    var dancerMakerFunction = types[Math.floor(Math.random() * types.length)];
 
     var newPosition = getOpenPosition();
     var x = newPosition.slice(0,newPosition.indexOf(":"));
@@ -92,7 +93,11 @@ $(document).ready(function(){
   var move = function(node, callback){
     callback = callback || null;
     var position = node.position();
-    removePosition(position.left,position.top);
+    if(position.left === 15){
+      console.log("can't do that!");
+      return false;
+    }
+    removePosition(leftChoices.indexOf(position.left),topChoices.indexOf(position.top));
     node.animate({ left: "-=" + gridWidth + "px"},"fast",callback);
     position = node.position();
     addPosition(position.left,position.top);
@@ -120,7 +125,7 @@ $(document).ready(function(){
     var toNum = +toNode.text();
     move(fromNode,function(){remove(fromNode);});
     toNode.text(fromNum + toNum);
-    if(!toNode.hasClass('scaredDancer')){
+    if(!toNode.hasClass("scaredDancer")){
       toNode.removeClass("blinkyDancer colorDancer").addClass("scaredDancer");
     }
   };
@@ -128,11 +133,12 @@ $(document).ready(function(){
   var remove = function(node) {
     var numLeft = node.position().left;
     var numTop = node.position().top;
-    var numId = checkForBlock(numLeft,numTop).data("dancerid");
+    var num = checkForBlock(numLeft,numTop);
     node.remove();
     for(var i = 0; i < window.dancers.length; i++){
       var id = window.dancers[i]._id;
-      if(id === numId){
+      console.log(num)
+      if(id === num.data("dancerid") && num.position().left === 0 && num.position().top === 0){
         window.dancers.splice(i,1);
       }
     }
@@ -149,7 +155,6 @@ $(document).ready(function(){
 
   $("body").on("click", ".dance", function() {
     for (var i = 0; i < window.dancers.length; i++) {
-      console.log('working');
       window.dancers[i].move($("#danceFloor").width() * Math.random());
     }
     $(this).text('Line up!').removeClass('dance').addClass('lineUp');
