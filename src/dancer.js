@@ -1,16 +1,17 @@
 // Creates and returns a new dancer object that can step
+
 var Dancer = function(top, left, timeBetweenSteps){
 
-  // use jQuery to create an HTML <span> tag
-  this.$node = $('<span class="dancer"></span>');
+  this._id = Dancer.prototype._nextId++;
+
+  this.$node = $('<span class="dancer" data-dancerId=' + this._id + '></span>');
   this.timeBetweenSteps = timeBetweenSteps;
   this.step();
   this.setPosition(top, left);
 };
 
 Dancer.prototype.step = function(){
-  var that = this;
-  setTimeout(that.step.bind(this), this.timeBetweenSteps);
+  setTimeout(this.step.bind(this), this.timeBetweenSteps);
 };
 
 Dancer.prototype.setPosition = function(top,left){
@@ -21,9 +22,11 @@ Dancer.prototype.setPosition = function(top,left){
   this.$node.css(styleSettings);
 };
 
-Dancer.prototype.lineUp = function(left){
+Dancer.prototype.move = function(left){
   var styleSettings = {
     left: left
   };
   this.$node.animate(styleSettings, 'slow');
 };
+
+Dancer.prototype._nextId = 1;

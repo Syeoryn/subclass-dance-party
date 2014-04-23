@@ -2,9 +2,12 @@ var ScaredDancer = function(top, left, timeBetweenSteps){
   // this = Object.create(BlinkyDancer.prototype);
   Dancer.call(this, top, left, timeBetweenSteps);
   this.$node.addClass('scaredDancer');
+  this.$node.text(3);
 };
 
 ScaredDancer.prototype = Object.create(Dancer.prototype);
+
+ScaredDancer.prototype.constructor = ScaredDancer;
 
 // ScaredDancer.prototype.step = function(){
 //   Dancer.prototype.step.call(this);
