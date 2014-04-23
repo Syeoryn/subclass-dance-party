@@ -5,27 +5,62 @@ $(document).ready(function(){
 
   var leftChoices = [];
   var topChoices = [];
-  var width = $("#danceFloor").width();
+  var width = $("#danceFloor").width() - 15;
   var height = $("#danceFloor").height() - 40;
+  var gridWidth = width / numAcross;
+  var gridHeight = height / numHigh;
+
   for (var i = 0; i < numAcross; i++) {
-    leftChoices.push(i/numAcross * width);
+    leftChoices.push(i * gridWidth + 15);
   }
+
   for (var i = 0; i < numHigh; i++) {
-    topChoices.push(i/numHigh * height + 40);
+    topChoices.push(i * gridHeight + 40);
   }
+
+  var addPosition = function(left,top){
+    positions[(left + ":" + top)] = false;
+  };
+
+  var removePosition = function(left,top){
+    positions[(left + ":" + top)] = true;
+  };
+
+  var positions = {};
+
+  for(var x = 0; x < leftChoices.length; x++){
+    for(var y = 0; y < topChoices.length; y++){
+      removePosition(x,y);
+    }
+  }
+
+  var getOpenPosition = function(){
+    var openPositions = [];
+    for(var position in positions){
+      if(positions[position]){
+        openPositions.push(position);
+      }
+    }
+    var newPosition = openPositions[Math.floor(Math.random() * openPositions.length)];
+    return newPosition;
+  };
 
   $(".addDancerButton").on("click", function(event){
     var dancerMakerFunctionName = $(this).data("dancer-maker-function-name");
     var dancerMakerFunction = window[dancerMakerFunctionName];
-    var dancer = new dancerMakerFunction(
-      topChoices[Math.floor(Math.random() * topChoices.length)],
-      leftChoices[Math.floor(Math.random() * leftChoices.length)],
-      Math.random() * 1000
-    );
+
+    var newPosition = getOpenPosition();
+    var x = newPosition.slice(0,newPosition.indexOf(":"));
+    var y = newPosition.slice(newPosition.indexOf(":") + 1);
+    var left = gridWidth * x + 15;
+    var top = gridHeight * y + 40;
+    addPosition(x,y);
+    var dancer = new dancerMakerFunction(top, left, Math.random() * 1000);
+
     dancer.$node.css({
-      width: width / numAcross * 0.9 + "px",
-      height: height / numHigh * 0.9 + "px",
-      "font-size": width / numAcross * 0.45 + "px",
+      width: gridWidth * 0.9 + "px",
+      height: gridHeight * 0.9 + "px",
+      "font-size": gridWidth * 0.45 + "px",
       "text-align": "center"
     });
 
@@ -34,7 +69,7 @@ $(document).ready(function(){
   });
 
   $("body").on("click", ".dancer", function(event) {
-    var targetLeft = $(this).position().left - 1/numAcross * width;
+    var targetLeft = $(this).position().left - gridWidth;
     var targetTop =  $(this).position().top;
     var $leftNode = checkForBlock(targetLeft,targetTop);
     if($leftNode){
@@ -56,8 +91,13 @@ $(document).ready(function(){
 
   var move = function(node, callback){
     callback = callback || null;
-    node.animate({ left: "-=" + 1/numAcross * width + "px"},"fast",callback);
+    var position = node.position();
+    removePosition(position.left,position.top);
+    node.animate({ left: "-=" + gridWidth + "px"},"fast",callback);
+    position = node.position();
+    addPosition(position.left,position.top);
   };
+
 
   var dontMove = function(node){
 
