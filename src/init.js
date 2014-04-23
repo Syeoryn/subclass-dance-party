@@ -15,25 +15,8 @@ $(document).ready(function(){
   }
 
   $(".addDancerButton").on("click", function(event){
-    /* This function sets up the click handlers for the create-dancer
-     * buttons on index.html. You should only need to make one small change to it.
-     * As long as the "data-dancer-maker-function-name" attribute of a
-     * class="addDancerButton" DOM node matches one of the names of the
-     * maker functions available in the global scope, clicking that node
-     * will call the function to make the dancer.
-     */
-
-    /* dancerMakerFunctionName is a string which must match
-     * one of the dancer maker functions available in global scope.
-     * A new object of the given type will be created and added
-     * to the stage.
-     */
     var dancerMakerFunctionName = $(this).data("dancer-maker-function-name");
-
-    // get the maker function for the kind of dancer we're supposed to make
     var dancerMakerFunction = window[dancerMakerFunctionName];
-
-    // make a dancer with a random position
     var dancer = new dancerMakerFunction(
       topChoices[Math.floor(Math.random() * topChoices.length)],
       leftChoices[Math.floor(Math.random() * leftChoices.length)],
@@ -53,20 +36,32 @@ $(document).ready(function(){
   $("body").on("click", ".dancer", function(event) {
     var targetLeft = $(this).position().left - 1/numAcross * width;
     var targetTop =  $(this).position().top;
-    var canMove = true;
+    var $leftNode = checkForBlock(targetLeft,targetTop);
+    if($leftNode){
+      validateMerge($(this),$leftNode);
+    } else{
+      move($(this));
+    }
+  });
+
+  var checkForBlock = function(left,top){
     for(var dancer = 0; dancer < window.dancers.length; dancer++){
-      var $node = window.dancers[dancer].$node;
-      if($node.position().left === targetLeft && $node.position().top === targetTop) {
-        canMove = false;
-        validateMerge($(this), $node);
+      var $number = window.dancers[dancer].$node;
+      if($number.position().left === left && $number.position().top === top){
+        return $number;
       }
     }
-    if (canMove) {
-      $(this).animate({ left: "-=" + 1/numAcross * width + "px"},"fast");
-    }
-    // $(this).animate({ left: "-=" + 1/numAcross * width + "px"},
-    //   "fast", function(){remove($(this))});
-  });
+    return false;
+  };
+
+  var move = function(node, callback){
+    callback = callback || null;
+    node.animate({ left: "-=" + 1/numAcross * width + "px"},"fast",callback);
+  };
+
+  var dontMove = function(node){
+
+  };
 
   var validateMerge = function(fromNode, toNode){
     var num1 = fromNode.text();
@@ -76,32 +71,29 @@ $(document).ready(function(){
     } else if (num1 >= 3 && num2 >= 3 && num1 === num2) {
       merge(fromNode, toNode);
     } else {
-      return false;
+      console.log("Can't move that!");
     }
   };
 
   var merge = function(fromNode, toNode) {
     var fromNum = +fromNode.text();
     var toNum = +toNode.text();
-    fromNode.animate({ left: "-=" + 1/numAcross * width + "px"},  "fast", function(){
-      remove(fromNode);
-    });
+    move(fromNode,function(){remove(fromNode);});
     toNode.text(fromNum + toNum);
+    if(!toNode.hasClass('scaredDancer')){
+      toNode.removeClass("blinkyDancer colorDancer").addClass("scaredDancer");
+    }
   };
 
   var remove = function(node) {
-    var dancer = node.position();
+    var numLeft = node.position().left;
+    var numTop = node.position().top;
+    var numId = checkForBlock(numLeft,numTop).data("dancerid");
+    node.remove();
     for(var i = 0; i < window.dancers.length; i++){
-      var currentDancer = window.dancers[i].$node.position();
-      if(dancer.left === currentDancer.left && dancer.top === currentDancer.top && node.data("dancerid") !== window.dancers[i]._id){
-        // node.css({'z-index': 2});
-        node.remove();
-        for(var j = 0; j < window.dancers.length; j++){
-          var toRemove = window.dancers[j]._id;
-          if(toRemove === node.data("dancerid")){
-            window.dancers.splice(j,1);
-          }
-        }
+      var id = window.dancers[i]._id;
+      if(id === numId){
+        window.dancers.splice(i,1);
       }
     }
   };
@@ -120,9 +112,7 @@ $(document).ready(function(){
       console.log('working');
       window.dancers[i].move($("#danceFloor").width() * Math.random());
     }
-    $(this).text('Line up!');
-    $(this).removeClass('dance');
-    $(this).addClass('lineUp');
+    $(this).text('Line up!').removeClass('dance').addClass('lineUp');
   });
 
 });
